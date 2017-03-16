@@ -6,7 +6,9 @@ api can be easily used:
 #!php
 
 include_once "SemantifyIt.php";
+
 $websiteKey = "rkvpGNrix";
+
 $sem = new SemantifyIt(websiteKey);
 
 $list = $sem->getAnnotationList();
