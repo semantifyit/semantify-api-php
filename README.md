@@ -2,7 +2,9 @@
 
 api can be easily used:
 
-`
+```
+#!php
+
 include_once "SemantifyIt.php";
 $websiteKey = "rkvpGNrix";
 $sem = new SemantifyIt(websiteKey);
@@ -12,5 +14,4 @@ $annotation = $sem->getAnnotation("rJL4cNBsg");
 
 var_dump($list);
 var_dump($annotation);
-
-`
+```
