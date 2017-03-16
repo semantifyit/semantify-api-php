@@ -109,7 +109,7 @@ class SemantifyIt {
     public function getAnnotationList(){
 
         $params["apiKey"] = $this->getWebsiteApiKey();
-        $json = $this->transport("GET", "user/list/",$params);
+        $json = $this->transport("GET", "annotation/list/",$params);
 
          return json_decode($json);
 
