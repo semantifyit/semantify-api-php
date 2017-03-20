@@ -82,6 +82,17 @@ class SemantifyIt {
         }
     }
 
+    /**
+     *
+     * function for decoding, it can be easily turned of if necessary
+     *
+     * @param $json
+     * @return mixed
+     */
+    private function decoding($json){
+        return json_decode($json);
+    }
+
 
     /**
      * getter for websiteApiKey
@@ -111,8 +122,7 @@ class SemantifyIt {
         $params["key"] = $this->getWebsiteApiKey();
         $json = $this->transport("GET", "annotation/list/",$params);
 
-         return json_decode($json);
-
+        return $json;
     }
 
     /**
