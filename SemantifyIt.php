@@ -18,6 +18,14 @@ class SemantifyIt {
     private $server = "https://staging.semantify.it/api";
 
 
+    /**
+     *
+     * var for displayin errors or not
+     *
+     * @var int
+     */
+    private $error = false;
+
 
     public function __construct($key = "")
     {
@@ -73,7 +81,10 @@ class SemantifyIt {
                     return $this->get($fullurl);
                 }
                 catch (Exception $e) {
-                    echo 'Caught exception: ',  $e->getMessage(), "\n";
+                    if($this->error){
+                        echo 'Caught exception: '.$e->getMessage(). "<br>";
+                    }
+
                     return false;
                 }
 
@@ -123,6 +134,10 @@ class SemantifyIt {
         $json = $this->transport("GET", "annotation/list/",$params);
 
         return $json;
+    }
+
+    public function getAnnotationByURL($url){
+        return $this->transport("GET", "annotation/url/".rawurlencode($url));
     }
 
     /**
