@@ -22,11 +22,42 @@ class SemantifyIt {
      *
      * var for displayin errors or not
      *
+     * true  => errors are shown
+     * false => errors are hidden
+     *
      * @var int
      */
     private $error = false;
 
+    /**
+     *
+     * fet error reporting value
+     *
+     * @return boolean
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
 
+    /**
+     *
+     * showing errors
+     * true  => errors are shown
+     * false => errors are hidden
+     *
+     * @param boolean $error
+     */
+    public function setError($error)
+    {
+        $this->error = $error;
+    }
+
+
+    /**
+     * SemantifyIt constructor.
+     * @param string $key
+     */
     public function __construct($key = "")
     {
         if($key!=""){
@@ -136,6 +167,13 @@ class SemantifyIt {
         return $json;
     }
 
+    /**
+     *
+     * Funciton which get annotations by url
+     *
+     * @param $url
+     * @return string
+     */
     public function getAnnotationByURL($url){
         return $this->transport("GET", "annotation/url/".rawurlencode($url));
     }
