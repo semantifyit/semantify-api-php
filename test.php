@@ -1,6 +1,6 @@
 <?php
 
-
+use STI\SemantifyIt\SemantifyIt;
 include_once "SemantifyIt.php";
 
 $sem = new SemantifyIt("rkvpGNrix");

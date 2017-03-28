@@ -1,4 +1,8 @@
 <?php
+namespace STI\SemantifyIt;
+
+use Exception;
+
 
 /**
  * Class SemantifyIt
