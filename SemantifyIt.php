@@ -198,12 +198,12 @@ class SemantifyIt {
      */
     public function getAnnotationList(){
 
-        $params["key"] = $this->getWebsiteApiKey();
-        $json = $this->transport("GET", "annotation/list/",$params);
+        //$params["key"] = $this->getWebsiteApiKey();
+        //$json = $this->transport("GET", "annotation/list/",$params);
 
-        if(!$this->isContentAvailable($json)) {
+        //if(!$this->isContentAvailable($json)) {
             $json = $this->transport("GET", "annotation/list/".$this->getWebsiteApiKey());
-        }
+        //}
 
         return $json;
     }
