@@ -19,8 +19,11 @@ class SemantifyIt {
      * variable for Url
      *  @param string $websiteKey;
      */
-    private $server = "https://staging.semantify.it/api";
+    private $live_server = "https://semantify.it/api";
 
+    private $staging_server = "https://staging.semantify.it/api";
+
+    private $live = true;
 
     /**
      *
@@ -29,9 +32,27 @@ class SemantifyIt {
      * true  => errors are shown
      * false => errors are hidden
      *
-     * @var int
+     * @var boolean
      */
     private $error = false;
+
+
+    /**
+     * @return int
+     */
+    public function getLive()
+    {
+        return $this->live;
+    }
+
+    /**
+     * @param int $live
+     */
+    public function setLive($live)
+    {
+        $this->live = $live;
+    }
+
 
     /**
      *
@@ -94,6 +115,13 @@ class SemantifyIt {
 
     }
 
+    private function isContentAvailable($input){
+        if(($input == "") || ($input == false) || (strpos($input, 'error') !== false)){
+            return false;
+        }
+        return true;
+    }
+
     /**
      *
      * transport layer for api
@@ -106,7 +134,11 @@ class SemantifyIt {
     private function transport($type, $path, $params=array()){
 
         /** url with server and path */
-        $url = $this->server.'/'.$path;
+        $url = $this->live_server.'/'.$path;
+        //if it is in staging server than switch to staging api
+        if($this->live==false){
+            $url = $this->staging_server.'/'.$path;
+        }
 
         switch ($type) {
 
@@ -146,6 +178,7 @@ class SemantifyIt {
      */
     public function getWebsiteApiKey()
     {
+        //return ""
         return $this->websiteApiKey;
     }
 
@@ -167,6 +200,10 @@ class SemantifyIt {
 
         $params["key"] = $this->getWebsiteApiKey();
         $json = $this->transport("GET", "annotation/list/",$params);
+
+        if(!$this->isContentAvailable($json)) {
+            $json = $this->transport("GET", "annotation/list/".$this->getWebsiteApiKey());
+        }
 
         return $json;
     }
