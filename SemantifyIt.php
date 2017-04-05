@@ -123,15 +123,36 @@ class SemantifyIt
 
     private function post($url, $params)
     {
-
-        $content = $this->curl("POST", $url, $params);
+        $action = "POST";
+        $content = $this->curl($action, $url, $params);
 
         if ($content === false) {
             throw new Exception('Error posting content to ' . $url);
         }
 
         if ($content == "") {
-            throw new Exception('No content returned from POST action at url ' . $url);
+            throw new Exception('No content returned from '.$action.' action at url ' . $url);
+        }
+
+        return $content;
+
+    }
+
+    private function patch($url, $params)
+    {
+        $action = "PATCH";
+        $content = $this->curl($action, $url, $params);
+
+        if ($content === false) {
+            throw new Exception('Error patching content to ' . $url);
+        }
+
+        if ($content == "") {
+            throw new Exception('No content returned from '.$action.' action at url ' . $url);
+        }
+
+        if ($content == "Not Found") {
+            throw new Exception('Annotation Not found for '.$action.' action at url ' . $url);
         }
 
         return $content;
@@ -142,7 +163,7 @@ class SemantifyIt
     private function curl($type, $url, $params)
     {
 
-        //var_dump($url);
+        //var_dump($type);
 
         $params_string = json_encode($params);
 
