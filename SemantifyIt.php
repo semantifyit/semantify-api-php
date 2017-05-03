@@ -278,6 +278,9 @@ class SemantifyIt
     public function getWebsiteApiKey()
     {
         //return ""
+        if (($this->error) && (($this->websiteApiKey=="") || ($this->websiteApiKey=="0"))){
+            echo "Caught problem: no API key saved!<br>";
+        }
         return $this->websiteApiKey;
     }
 
