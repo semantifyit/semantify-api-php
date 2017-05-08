@@ -93,6 +93,14 @@ class SemantifyIt
         if ($key != "") {
             $this->setWebsiteApiKey($key);
         }
+
+        if($this->error){
+            if(!function_exists('curl_version')) {
+                die("No curl library installed! API will not work.");
+            }
+        }
+
+
     }
 
 
@@ -107,7 +115,14 @@ class SemantifyIt
     private function get($url)
     {
 
-        $content = @file_get_contents($url);
+        //if allow url fopen is allowed we will use file_get_contents otherwise curl
+        if(ini_get('allow_url_fopen')){
+            $content = @file_get_contents($url);
+        }else{
+            $content = $this->curl("GET", $url);
+        }
+
+
 
         if ($content === false) {
             throw new Exception('Error getting content from ' . $url);
@@ -160,7 +175,7 @@ class SemantifyIt
     }
 
 
-    private function curl($type, $url, $params)
+    private function curl($type, $url, $params="")
     {
 
         //var_dump($type);
@@ -171,18 +186,22 @@ class SemantifyIt
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER,
-                    array('Content-Type: application/json', 'Content-Length: ' . strlen($params_string)));
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params_string);
+
+        if($type!="GET"){
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $params_string);
+            curl_setopt($ch, CURLOPT_HTTPHEADER,
+                        array('Content-Type: application/json', 'Content-Length: ' . strlen($params_string)));
+        }
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
        // echo($response);
 
         if (curl_error($ch) && ($this->error)) {
-            echo 'CURL error:' . curl_error($ch);
+            echo 'CURL error:' . curl_error($ch)."<br>";
         }
 
         curl_close($ch);
