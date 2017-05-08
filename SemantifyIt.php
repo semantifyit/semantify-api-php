@@ -116,12 +116,6 @@ class SemantifyIt
     {
 
         //if allow url fopen is allowed we will use file_get_contents otherwise curl
-        if(ini_get('allow_url_fopen')){
-            $content = @file_get_contents($url);
-        }else{
-            $content = $this->curl("GET", $url);
-        }
-
         $content = $this->curl("GET", $url);
 
         if ($content === false) {
@@ -203,7 +197,7 @@ class SemantifyIt
         }
 
         curl_close($ch);
-        var_dump($response);
+        //var_dump($response);
         return $response;
 
     }
