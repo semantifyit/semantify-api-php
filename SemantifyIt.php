@@ -122,7 +122,7 @@ class SemantifyIt
             $content = $this->curl("GET", $url);
         }
 
-
+        $content = $this->curl("GET", $url);
 
         if ($content === false) {
             throw new Exception('Error getting content from ' . $url);
@@ -178,8 +178,6 @@ class SemantifyIt
     private function curl($type, $url, $params="")
     {
 
-        //var_dump($type);
-
         $params_string = json_encode($params);
 
         //var_dump($params_string);
@@ -205,7 +203,7 @@ class SemantifyIt
         }
 
         curl_close($ch);
-
+        var_dump($response);
         return $response;
 
     }
