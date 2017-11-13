@@ -181,6 +181,7 @@ class SemantifyIt
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
 
         if($type!="GET"){
             curl_setopt($ch, CURLOPT_POSTFIELDS, $params_string);
@@ -229,6 +230,7 @@ class SemantifyIt
         if ($this->live == false) {
             $url = $this->staging_server . '/' . $path;
         }
+
 
         switch ($type) {
 
