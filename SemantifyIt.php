@@ -19,6 +19,12 @@ class SemantifyIt
     private $websiteApiKey;
 
     /**
+     * website secret
+     */
+    private $websiteApiSecret;
+
+
+    /**
      * variable for Url
      *
      * @param string $websiteKey ;
@@ -84,24 +90,138 @@ class SemantifyIt
 
 
     /**
+     * @return mixed
+     */
+    public function getWebsiteApiSecret()
+    {
+        if($this->websiteApiSecret==""){
+            throw new Exception("Caught problem: no API secret saved!");
+        }
+
+        return $this->websiteApiSecret;
+    }
+
+    /**
+     * @param mixed $websiteApiSecret
+     */
+    public function setWebsiteApiSecret($websiteApiSecret)
+    {
+        $this->websiteApiSecret = $websiteApiSecret;
+    }
+
+    /**
+     * getter for websiteApiKey
+     *
+     * @return string
+     */
+    public function getWebsiteApiKey()
+    {
+        //return ""
+        if (($this->error) && (($this->websiteApiKey=="") || ($this->websiteApiKey=="0"))){
+            throw new Exception("Caught problem: no API key saved!");
+            echo "Caught problem: no API key saved!<br>";
+        }
+        return $this->websiteApiKey;
+    }
+
+    /**
+     * setter for websiteApiKey
+     *
+     * @param string $websiteApiKey
+     */
+    public function setWebsiteApiKey($websiteApiKey)
+    {
+        $this->websiteApiKey = $websiteApiKey;
+    }
+
+
+    /**
      * SemantifyIt constructor.
      *
      * @param string $key
      */
-    public function __construct($key = "")
+    public function __construct($key = "", $secret = "")
     {
         if ($key != "") {
             $this->setWebsiteApiKey($key);
         }
 
-        if($this->error){
-            if(!function_exists('curl_version')) {
+        if ($secret != "") {
+            $this->setWebsiteApiSecret($secret);
+        }
+
+        if(!function_exists('curl_version')) {
                 die("No curl library installed! API will not work.");
-            }
+        }
+
+    }
+
+
+    /**
+     *
+     * transport layer for api
+     *
+     * @param       $type
+     * @param       path
+     * @param array $params
+     * @return string
+     */
+    private function transport($type, $path, $params = array(), $settings = array())
+    {
+
+        $headers = array();
+
+        /** url with server and path */
+        $url = $this->live_server . '/' . $path;
+        //if it is in staging server than switch to staging api
+        if ($this->live == false) {
+            $url = $this->staging_server . '/' . $path;
+        }
+
+        /** add support for headers */
+        if(!empty($settings["headers"])){
+            $headers = $settings["headers"];
         }
 
 
+        switch ($type) {
+
+            case "GET":
+                try {
+                    $fullurl = $url . (count($params) == 0 ? '' : '?' . http_build_query($params));
+
+                    return $this->get($fullurl, $headers);
+                } catch (Exception $e) {
+                    if ($this->error) {
+                        echo 'Caught exception: ' . $e->getMessage() . "<br>";
+                    }
+
+                    return false;
+                }
+                break;
+
+            case "POST":
+            case "PATCH":
+                try {
+                    $fullurl = $url;
+
+                    //call the class method
+                    return call_user_func_array(array($this, strtolower($type)), array($fullurl, $params, $headers));
+
+                } catch (Exception $e) {
+                    if ($this->error) {
+                        echo 'Caught exception: ' . $e->getMessage() . "<br>";
+                    }
+
+                    return false;
+                }
+
+                break;
+
+
+        }
     }
+
 
 
     /**
@@ -112,11 +232,11 @@ class SemantifyIt
      * @return string return content
      * @throws Exception
      */
-    private function get($url)
+    private function get($url, $headers)
     {
 
         //if allow url fopen is allowed we will use file_get_contents otherwise curl
-        $content = $this->curl("GET", $url);
+        $content = $this->curl("GET", $url, "", $headers);
 
         if ($content === false) {
             throw new Exception('Error getting content from ' . $url);
@@ -130,10 +250,10 @@ class SemantifyIt
 
     }
 
-    private function post($url, $params)
+    private function post($url, $params, $headers)
     {
         $action = "POST";
-        $content = $this->curl($action, $url, $params);
+        $content = $this->curl($action, $url, $params, $headers);
 
         if ($content === false) {
             throw new Exception('Error posting content to ' . $url);
@@ -147,10 +267,10 @@ class SemantifyIt
 
     }
 
-    private function patch($url, $params)
+    private function patch($url, $params, $headers)
     {
         $action = "PATCH";
-        $content = $this->curl($action, $url, $params);
+        $content = $this->curl($action, $url, $params, $headers);
 
         if ($content === false) {
             throw new Exception('Error patching content to ' . $url);
@@ -169,12 +289,10 @@ class SemantifyIt
     }
 
 
-    private function curl($type, $url, $params="")
+    private function curl($type, $url, $params="", $headers)
     {
 
-        $params_string = json_encode($params);
-
-        //var_dump($params_string);
+        //echo $url;
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -184,9 +302,15 @@ class SemantifyIt
         curl_setopt($ch, CURLOPT_TIMEOUT, 300);
 
         if($type!="GET"){
+
+            $params_string = $params; //because it is already in json
             curl_setopt($ch, CURLOPT_POSTFIELDS, $params_string);
-            curl_setopt($ch, CURLOPT_HTTPHEADER,
-                        array('Content-Type: application/json', 'Content-Length: ' . strlen($params_string)));
+
+
+            $Headers = array_merge(array('Content-Type: application/json', 'Content-Length: ' . strlen($params_string)), $headers);
+
+            //var_dump($Headers);
+            curl_setopt($ch, CURLOPT_HTTPHEADER,$Headers);
         }
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -212,63 +336,6 @@ class SemantifyIt
         return true;
     }
 
-    /**
-     *
-     * transport layer for api
-     *
-     * @param       $type
-     * @param       path
-     * @param array $params
-     * @return string
-     */
-    private function transport($type, $path, $params = array())
-    {
-
-        /** url with server and path */
-        $url = $this->live_server . '/' . $path;
-        //if it is in staging server than switch to staging api
-        if ($this->live == false) {
-            $url = $this->staging_server . '/' . $path;
-        }
-
-
-        switch ($type) {
-
-            case "GET":
-                try {
-                    $fullurl = $url . (count($params) == 0 ? '' : '?' . http_build_query($params));
-
-                    return $this->get($fullurl);
-                } catch (Exception $e) {
-                    if ($this->error) {
-                        echo 'Caught exception: ' . $e->getMessage() . "<br>";
-                    }
-
-                    return false;
-                }
-                break;
-
-            case "POST":
-            case "PATCH":
-                try {
-                    $fullurl = $url;
-
-                    //call the class method
-                    return call_user_func_array(array($this, strtolower($type)), array($fullurl, $params));
-
-                } catch (Exception $e) {
-                    if ($this->error) {
-                        echo 'Caught exception: ' . $e->getMessage() . "<br>";
-                    }
-
-                    return false;
-                }
-
-                break;
-
-
-        }
-    }
 
     /**
      *
@@ -283,29 +350,7 @@ class SemantifyIt
     }
 
 
-    /**
-     * getter for websiteApiKey
-     *
-     * @return string
-     */
-    public function getWebsiteApiKey()
-    {
-        //return ""
-        if (($this->error) && (($this->websiteApiKey=="") || ($this->websiteApiKey=="0"))){
-            echo "Caught problem: no API key saved!<br>";
-        }
-        return $this->websiteApiKey;
-    }
 
-    /**
-     * setter for websiteApiKey
-     *
-     * @param string $websiteApiKey
-     */
-    public function setWebsiteApiKey($websiteApiKey)
-    {
-        $this->websiteApiKey = $websiteApiKey;
-    }
 
     /**
      * returns website annotations based on websiteApiKey
@@ -333,10 +378,8 @@ class SemantifyIt
      */
     public function postAnnotation($json)
     {
-
-        $params["content"] = $json;
-        $json = $this->transport("POST", "annotation/" . $this->getWebsiteApiKey(), $params);
-
+        $settings["headers"] = array('website-secret:'." ".$this->getWebsiteApiSecret());
+        $json = $this->transport("POST", "annotation/" . $this->getWebsiteApiKey(), $json, $settings);
 
         return $json;
     }
@@ -383,6 +426,16 @@ class SemantifyIt
     {
 
         return $this->transport("GET", "annotation/short/" . $id);
+
+    }
+    /**
+     *
+     * save annotation to website
+     *
+     */
+
+    public function saveAnnotationToWebsite(){
+
 
     }
 
