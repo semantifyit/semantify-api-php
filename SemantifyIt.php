@@ -386,18 +386,17 @@ class SemantifyIt
 
     /**
      *
-     * update an annotation by uid
+     * update an annotation by uid to website
      *
      * @param $json
      * @param $uid
      * @return string
      */
-    public function updateAnnotation($json, $uid)
+    public function updateAnnotation($json, $uid, $secret)
     {
 
-        $params["content"] = $json;
-        $json = $this->transport("PATCH", "annotation/".$uid."/" . $this->getWebsiteApiKey(), $params);
-
+        $settings["headers"] = array('website-secret:'." ".$secret);
+        $json = $this->transport("PATCH", "annotation/".$uid."/" . $this->getWebsiteApiKey(), $json, $settings);
 
         return $json;
     }
@@ -426,16 +425,6 @@ class SemantifyIt
     {
 
         return $this->transport("GET", "annotation/short/" . $id);
-
-    }
-    /**
-     *
-     * save annotation to website
-     *
-     */
-
-    public function saveAnnotationToWebsite(){
-
 
     }
 
