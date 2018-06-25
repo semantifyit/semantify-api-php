@@ -378,6 +378,8 @@ class SemantifyIt
      */
     public function postAnnotation($json)
     {
+
+
         $settings["headers"] = array('website-secret:'." ".$this->getWebsiteApiSecret());
         $json = $this->transport("POST", "annotation/" . $this->getWebsiteApiKey(), $json, $settings);
 
@@ -392,10 +394,10 @@ class SemantifyIt
      * @param $uid
      * @return string
      */
-    public function updateAnnotation($json, $uid, $secret)
+    public function updateAnnotation($json, $uid)
     {
 
-        $settings["headers"] = array('website-secret:'." ".$secret);
+        $settings["headers"] = array('website-secret:'." ".$this->getWebsiteApiSecret());
         $json = $this->transport("PATCH", "annotation/".$uid."/" . $this->getWebsiteApiKey(), $json, $settings);
 
         return $json;
