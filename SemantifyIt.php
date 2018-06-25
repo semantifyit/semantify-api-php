@@ -394,11 +394,11 @@ class SemantifyIt
      * @param $uid
      * @return string
      */
-    public function updateAnnotation($json, $uid)
+    public function updateAnnotation($json, $UID)
     {
 
         $settings["headers"] = array('website-secret:'." ".$this->getWebsiteApiSecret());
-        $json = $this->transport("PATCH", "annotation/".$uid."/" . $this->getWebsiteApiKey(), $json, $settings);
+        $json = $this->transport("PATCH", "annotation/".$UID."/".$this->getWebsiteApiKey(), $json, $settings);
 
         return $json;
     }
