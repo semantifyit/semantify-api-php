@@ -398,7 +398,8 @@ class SemantifyIt
     {
 
         $settings["headers"] = array('website-secret:'." ".$this->getWebsiteApiSecret());
-        $json = $this->transport("PATCH", "annotation/".$UID."/".$this->getWebsiteApiKey(), $json, $settings);
+        $json = $this->transport("PATCH", "annotation/uid/".$UID, $json, $settings);
+
 
         return $json;
     }
